@@ -2,7 +2,7 @@ interface ShowWinnerProps {
   winner: string;
 }
 
-function ShowWinner({ winner }: ShowWinnerProps) {
+const ShowWinner: React.FC<ShowWinnerProps> = ({ winner }) => {
   return <div>{`${winner} Wins!`}</div>;
 }
 

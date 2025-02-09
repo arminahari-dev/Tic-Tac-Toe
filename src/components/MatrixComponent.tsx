@@ -2,16 +2,16 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import ShowWinner from "./ShowWinner";
 
-const MatrixComponent = () => {
-  const [matrix, setMatrix] = useState([
+const MatrixComponent: React.FC = () => {
+  type Player = "x" | "o";
+  const [matrix, setMatrix] = useState<Array<string[]>>([
     ["", "", ""],
     ["", "", ""],
     ["", "", ""],
   ]);
-  type Player = "x" | "o";
   const [currentPlayer, setCurrentPlayer] = useState<Player>("x");
   const [gameWinner, setGameWinner] = useState<string>("");
-  const [gameOver, setGameOver] = useState(false);
+  const [gameOver, setGameOver] = useState<boolean>(false);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement>,
