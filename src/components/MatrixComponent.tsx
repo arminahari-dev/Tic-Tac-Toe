@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import ShowWinner from "./ShowWinner";
-import XAscii from "./XMark";
+import XMark from "./XMark";
+import Board from "./Board";
 
 const MatrixComponent: React.FC = () => {
   type Player = "x" | "o";
@@ -144,29 +145,13 @@ const MatrixComponent: React.FC = () => {
         </span>
       </h2>
       <div className="relative">
-        <table className={`${blur && "blur-md"}`}>
-          <tbody>
-            {matrix.map((row, rowIndex) => (
-              <tr key={rowIndex}>
-                {row.map((cell, colIndex) => (
-                  <td key={colIndex} className="p-[10px] text-center">
-                    <input
-                      value={cell}
-                      className={`border-white border rounded-md w-8 text-center ${
-                        gameOver && "opacity-50 cursor-not-allowed"
-                      }`}
-                      type="text"
-                      maxLength={1}
-                      onChange={(e) => handleChange(e, rowIndex, colIndex)}
-                      disabled={cell !== "" || gameOver}
-                    />
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {isDraw && <XAscii size={3} />}
+        <Board
+          matrix={matrix}
+          handleChange={handleChange}
+          gameOver={gameOver}
+          blur={blur}
+        />
+        {isDraw && <XMark size={3} />}
       </div>
       {gameWinner && <ShowWinner winner={gameWinner} />}
       <button
