@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import ShowWinner from "./ShowWinner";
+import XAscii from "./XMark";
 
 const MatrixComponent: React.FC = () => {
   type Player = "x" | "o";
@@ -12,6 +13,9 @@ const MatrixComponent: React.FC = () => {
   const [currentPlayer, setCurrentPlayer] = useState<Player>("x");
   const [gameWinner, setGameWinner] = useState<string>("");
   const [gameOver, setGameOver] = useState<boolean>(false);
+  const [isDraw, setIsDraw] = useState<boolean>(false);
+  const [blur, setBlur] = useState<boolean>(false);
+  const [disableAutoMode, setDisableAutoMode] = useState<boolean>(false);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement>,
@@ -79,6 +83,13 @@ const MatrixComponent: React.FC = () => {
     if (winner) {
       setGameWinner(winner);
       setGameOver(true);
+      setDisableAutoMode(true);
+    }
+    const allCellsFilledWithNoWinner =
+      matrix.flat().every((cell) => cell !== "") && !winner;
+    if (allCellsFilledWithNoWinner) {
+      setIsDraw(true);
+      setBlur(true);
     }
   }, [matrix]);
 
@@ -91,6 +102,34 @@ const MatrixComponent: React.FC = () => {
     setCurrentPlayer("x");
     setGameWinner("");
     setGameOver(false);
+    setIsDraw(false);
+    setBlur(false);
+    setDisableAutoMode(false);
+  }
+
+  function getRandomMatrixIndex() {
+    const emptyCell = [];
+
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 3; col++) {
+        if (matrix[row][col] === "") {
+          emptyCell.push([row, col]);
+        }
+      }
+    }
+    const randomIndex = emptyCell[Math.floor(Math.random() * emptyCell.length)];
+    return randomIndex;
+  }
+
+  const randomIndex = getRandomMatrixIndex();
+
+  function handleAutoMode() {
+    setMatrix((prevMatrix) => {
+      const newMatrix = prevMatrix.map((r) => [...r]);
+      newMatrix[randomIndex[0]][randomIndex[1]] = "o";
+      return newMatrix;
+    });
+    setCurrentPlayer((prev) => (prev === "x" ? "o" : "x"));
   }
 
   return (
@@ -104,34 +143,48 @@ const MatrixComponent: React.FC = () => {
           {currentPlayer}
         </span>
       </h2>
-      <table>
-        <tbody>
-          {matrix.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              {row.map((cell, colIndex) => (
-                <td key={colIndex} className="p-[10px] text-center">
-                  <input
-                    value={cell}
-                    className={`border-white border rounded-md w-8 text-center ${
-                      gameOver && "opacity-50 cursor-not-allowed"
-                    }`}
-                    type="text"
-                    maxLength={1}
-                    onChange={(e) => handleChange(e, rowIndex, colIndex)}
-                    disabled={cell !== "" || gameOver}
-                  />
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="relative">
+        <table className={`${blur && "blur-md"}`}>
+          <tbody>
+            {matrix.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                {row.map((cell, colIndex) => (
+                  <td key={colIndex} className="p-[10px] text-center">
+                    <input
+                      value={cell}
+                      className={`border-white border rounded-md w-8 text-center ${
+                        gameOver && "opacity-50 cursor-not-allowed"
+                      }`}
+                      type="text"
+                      maxLength={1}
+                      onChange={(e) => handleChange(e, rowIndex, colIndex)}
+                      disabled={cell !== "" || gameOver}
+                    />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {isDraw && <XAscii size={3} />}
+      </div>
       {gameWinner && <ShowWinner winner={gameWinner} />}
       <button
         onClick={handleRestart}
         className="bg-sky-500 hover:bg-sky-700 px-4 py-2 rounded-md"
       >
         restart the game
+      </button>
+      <button
+        disabled={disableAutoMode || currentPlayer === "x"}
+        onClick={handleAutoMode}
+        className={`bg-sky-500 hover:bg-sky-700 px-4 py-2 rounded-md ${
+          currentPlayer === "x" || gameOver
+            ? "opacity-50 cursor-not-allowed"
+            : ""
+        }`}
+      >
+        Auto mode
       </button>
     </>
   );
